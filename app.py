@@ -9,7 +9,7 @@ from bson import ObjectId
 app = Sanic("CoffeeLeaf")
 
 # MongoDB connection
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = "mongodb://localhost:9191"
 DB_NAME = "coffee_leaf"
 
 SECRET_KEY = "X1m#CQUq*97PLcLB"  
