@@ -1,0 +1,12 @@
+sanic
+torch --index-url https://download.pytorch.org/whl/cu118
+torchvision 
+torchaudio
+pillow
+cv2
+numpy
+matplotlib
+pandas
+scikit-learn
+motor # thư viện kết nối với mongodb
+git+https://github.com/facebookresearch/segment-anything-2.git
