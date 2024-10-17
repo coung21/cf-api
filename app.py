@@ -89,7 +89,6 @@ async def login(request):
     # Respond with the token
     return json({"message": "Login successful", "token": token})
 
-# Route: Get all users (without sensitive information)
 @app.route("/users", methods=["GET"])
 async def get_all_users(request):
     users = []
@@ -98,7 +97,8 @@ async def get_all_users(request):
             "id": str(user["_id"]),
             "username": user["username"],
             "phone": user["phone"],
-            "created_at": user["created_at"]
+            # Convert created_at to string (ISO format)
+            "created_at": user["created_at"].isoformat() if "created_at" in user else None
         })
     return json({"users": users})
 
