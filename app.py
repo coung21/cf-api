@@ -33,7 +33,11 @@ def generate_jwt(user):
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
+# Add this route to your existing Sanic app
 
+@app.route("/test", methods=["GET"])
+async def test_route(request):
+    return json({"message": "test success"})
 # Route: User registration (sign-up)
 @app.route("/register", methods=["POST"])
 async def register(request):
