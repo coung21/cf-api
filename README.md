@@ -1,5 +1,5 @@
 
-## Prerequisites
+## Pre-requisites
 
 - **Sanic** - Web server framework
 - **Motor** - Async MongoDB driver for Python
@@ -18,13 +18,13 @@ pip install -r requirements.txt
 
 1. **Install zrok**: If you haven't installed zrok yet, visit [zrok.io](https://zrok.io) to download and set it up.
 
-2. **Enable zrok for Tunneling**: Use the following command to enable your zrok account (replace with your token):
+2. **Enable zrok for Tunneling**: Use the following command to enable your zrok account (replace token if you have account):
 
     ```bash
     zrok enable utz8rO7v1kIw
     ```
 
-3. **Expose MongoDB through zrok**: Run the following command to share your MongoDB instance (replace with your own private token):
+3. **Expose MongoDB through zrok**:
 
     ```bash
     zrok access private 9h1syz522r2f
@@ -32,4 +32,4 @@ pip install -r requirements.txt
 
     By default, zrok will expose MongoDB on port `9191`.
 
-Now your MongoDB instance is accessible through the shared zrok URL. Update your application's MongoDB connection string to use `localhost:9191` as the MongoDB host.
+**Khang Nguyen**
