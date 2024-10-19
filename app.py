@@ -29,7 +29,7 @@ def generate_jwt(user):
         "user_id": str(user['_id']),
         "username": user['username'],
         "phone": user['phone'], 
-        "exp": datetime.utcnow() + datetime.timedelta(hours=1)  # 1 hour expiration
+        "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)  # 1 hour expiration
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
@@ -58,7 +58,7 @@ async def register(request):
         "username": username,
         "phone": phone,
         "password_hash": password_hash,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.datetime.now(datetime.UTC)
     }
     
     # Insert the user into the MongoDB collection
