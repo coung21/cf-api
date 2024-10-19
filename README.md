@@ -27,7 +27,7 @@ pip install -r requirements.txt
 3. **Expose MongoDB through zrok**:
 
     ```bash
-    zrok access private 9h1syz522r2f
+    zrok access private c9z6hhgbbi08
     ```
 
     By default, zrok will expose MongoDB on port `9191`.
