@@ -12,4 +12,7 @@ motor # thư viện kết nối với mongodb
 passlib # thư viện mã hóa mật khẩu
 bcrypt # thuật toán mã hóa mật khẩu
 sanic-jwt # thư viện xác thực jwt
+pyjwt
+sanic-cors
+
 git+https://github.com/facebookresearch/segment-anything-2.git
