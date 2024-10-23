@@ -3,7 +3,7 @@ import requests
 
 # Streamlit simple login/signup interface for testing the Sanic API
 
-API_URL = "http://localhost:8000"  # Adjust to your Sanic server URL
+API_URL = "http://localhost:9191"  # Adjust to your Sanic server URL
 
 # Define a function to register users
 def register_user(username, phone, password):
