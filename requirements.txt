@@ -14,5 +14,5 @@ bcrypt # thuật toán mã hóa mật khẩu
 sanic-jwt # thư viện xác thực jwt
 pyjwt
 sanic-cors
-
+python-dotenv
 git+https://github.com/facebookresearch/segment-anything-2.git
