@@ -1,0 +1,48 @@
+[
+    {
+        "idx": 0,
+        "disease": "healthy",
+        "cause": "",
+        "solution": []
+    },
+    {
+        "idx": 2,
+        "disease": "rust",
+        "cause": "Bệnh nấm này có tên là Hemileiavastatrix ảnh hưởng đến lá của cây cà phê. Cây cà phê đóng vai trò là vật chủ bắt buộc của CLR, vi khuẩn này phát triển và sinh sản trên bề mặt lá của cây cà phê. Nó làm suy giảm và tàn phá diện tích lá xanh làm thức ăn cho cây. Các triệu chứng của CLR bao gồm các đốm nhỏ, hơi vàng, nhờn trên bề mặt lá phía trên, sau đó mở rộng thành các đốm tròn lớn hơn, chuyển sang màu cam sáng, sau đó là màu đỏ và cuối cùng là màu nâu với viền màu vàng. Các vết rỉ sắt có dạng bột, màu vàng cam dưới mặt lá, sau chuyển sang màu đen. Những chiếc lá rỉ sét rụng xuống khiến những cây bị ảnh hưởng gần như trụi lá",
+        "solution": [
+            " Abenix 10FL (Albendazole 10%) sử dụng với nồng độ 0,25-0,3% (pha 25 - 30ml thuốc vào bình 10 lít phun ướt đều toàn cây, phun làm 2 lần cách nhau 7 ngày).",
+            "Chevin 5SC (Hexaconazole 5%): Lượng dùng 1-2 lít thuốc/ha, pha 40 - 60ml thuốc/bình 16lít nước, phun ướt đẫm tán lá cà phê. Nếu bệnh nặng phun lần 2 cách lần đầu 7 ngày."
+        ]
+    },
+    {
+        "idx": 1,
+        "name": "miner",
+        "cause": "Rệp con mới nở có màu hồng chưa có sáp bên mình chân khá phát triển thường sống tập trung gây hại ở nhiều bộ phận như chồi non, cuống hoa, chùm quả, gốc cây.. để hút nhựa. Rệp sáp gây hại bằng cách chích hút nhựa quả cây cà phê làm cây kém phát triển, trường hợp nặng làm rụng, khô héo thậm chí khô cành chết cây.",
+        "solution": [
+            " Hun khói để hạn chế sự phát triển của rệp sáp",
+            "Làm rào chắn hoặc căng dây giữa các hàng để chắn các cây tránh rệp sáp lây lan",
+            "Vệ sinh sạch sẽ dụng cụ làm vườn hạn chế rệp sáp phát tán",
+            "Khồng trồng các loại cây là ký của của rệp sáp gần vườn cà phê",
+            "Tưới rửa vườn bằng vòi nước mạnh để rửa trôi rệp sáp"
+        ]
+    },
+    {
+        "idx": 3,
+        "name": "phoma",
+        "cause": "Là một loại nấm gây bệnh trên cây cà phê, đặc biệt ảnh hưởng đến lá và quả trước khi chín. Nấm này tồn tại trong đất và có thể lây nhiễm qua các con đường: Nấm tồn tại trong đất và lây lan qua rễ cây. Lá, cành hoặc quả bị nhiễm bệnh không được loại bỏ, tạo điều kiện cho nấm phát triển và lây lan. Độ ẩm cao và nhiệt độ ấm áp tạo môi trường lý tưởng cho nấm phát triển.",
+        "solution": [
+            "Copper Oxychloride: Hoạt chất này có tác dụng ngăn chặn sự phát triển của nấm gây bệnh.Liều lượng: Pha 25-30g thuốc trong 10 lít nước, phun đều lên cây.",
+            "Mancozeb: Là thuốc diệt nấm phổ rộng, hiệu quả trong việc kiểm soát bệnh phoma.Liều lượng: Pha 20-25g thuốc trong 10 lít nước, phun lên tán lá.",
+            "Carbendazim: Hoạt chất này có khả năng tiêu diệt nấm và ngăn chặn sự lây lan của bệnh.Liều lượng: Pha 10-15ml thuốc trong 10 lít nước, phun đều lên cây."
+        ]
+    },
+    {
+        "idx": 4,
+        "name": "cercospora",
+        "cause": "Bệnh Cercospora trên cây cà phê, thường được gọi là bệnh đốm mắt cua, do nấm Cercospora coffeicola gây ra. Bệnh này ảnh hưởng chủ yếu đến lá và quả cà phê, gây giảm năng suất và chất lượng sản phẩm.Nấm Cercospora coffeicola là tác nhân chính gây bệnh, phát triển mạnh trong điều kiện ẩm ướt và nhiệt độ cao.",
+        "solution": [
+            "Thuốc diệt nấm: Sử dụng các loại thuốc chứa hoạt chất như Anvil 5 SC (0,2%), Tilt 250 EC (0,1%), Bumper 250EC (0,1%) phun 2-3 lần, mỗi lần cách nhau 2 tuần.",
+            "Sử dụng nấm đối kháng: Áp dụng chế phẩm sinh học chứa vi sinh vật có lợi như Trichoderma spp. để ức chế sự phát triển của nấm gây bệnh."
+        ]
+    }
+]
