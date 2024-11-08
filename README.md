@@ -8,10 +8,15 @@
 
 ## Installation
 
-To install the required dependencies, run the following command:
+1. To install the required dependencies, run the following command:
 
 ```bash
 pip install -r requirements.txt
+```
+
+2. To install the checkpoints, run the following command:
+```bash
+bash checkpoints.sh
 ```
 
 ## How to Use
@@ -32,4 +37,4 @@ pip install -r requirements.txt
 
     By default, zrok will expose MongoDB on port `9191`.
 
-**Khang Nguyen**
+**Khang Nguyen Beo**

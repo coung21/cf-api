@@ -15,4 +15,5 @@ sanic-jwt # thư viện xác thực jwt
 pyjwt
 sanic-cors
 python-dotenv
+gdown
 git+https://github.com/facebookresearch/segment-anything-2.git
