@@ -18,8 +18,23 @@ pip install -r requirements.txt
 ```bash
 bash checkpoints.sh
 ```
+(If you are using wsl, dont open the `checkpoints.sh` file because it will cause some character errors in the file)
+
+3. Add .env file in the root directory:
+```env
+MONGO_URI= 
+DB_NAME=
+SECRET_KEY=
+```
 
 ## How to Use
+
+1. Run the following command:
+```bash
+sanic app
+```
+
+## How to Use (deprecated)
 
 1. **Install zrok**: If you haven't installed zrok yet, visit [zrok.io](https://zrok.io) to download and set it up.
 
