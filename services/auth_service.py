@@ -22,7 +22,7 @@ async def register_user(db, user_data):
         "username": username,
         "phone": phone,
         "password_hash": password_hash,
-        "created_at": datetime.datetime.now(datetime.UTC)
+        "created_at": datetime.datetime.now()
     }
 
     result = await db.users.insert_one(user)

@@ -16,4 +16,5 @@ pyjwt
 sanic-cors
 python-dotenv
 gdown
+cloudinary
 git+https://github.com/facebookresearch/segment-anything-2.git

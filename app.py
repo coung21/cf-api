@@ -3,7 +3,8 @@ from sanic.response import json
 from sanic.log import logger
 from sanic_cors import CORS
 from motor.motor_asyncio import AsyncIOMotorClient
-from config import MONGO_URI, DB_NAME
+import cloudinary
+from config import MONGO_URI, DB_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME
 from routes import init_routes
 
 app = Sanic("CoffeeLeafAPI")
@@ -22,7 +23,18 @@ async def setup_db(app, loop):
         logger.info("Connected to MongoDB successfully")
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {e}")
-
+        
+@app.listener('before_server_start')
+async def setup_cloudinary(app, loop):
+    try:
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET
+        )
+        logger.info("Connected to Cloudinary successfully")
+    except Exception as e:
+        logger.error(f"Failed to connect to Cloudinary: {e}")
 
 @app.listener('after_server_stop')
 async def close_db(app, loop):
