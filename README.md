@@ -33,10 +33,12 @@ CLOUDINARY_API_SECRET=
 
 ## How to Use
 
-1. Run the following command:
+Run the following command to start the server:
 ```bash
 sanic app
 ```
+To use the api docs, open the following URL (use different host for zrok):
+`http://127.0.0.1/docs`
 
 ## How to Use (deprecated)
 
