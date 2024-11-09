@@ -35,7 +35,7 @@ CLOUDINARY_API_SECRET=
 
 Run the following command to start the server:
 ```bash
-sanic app
+python app.py
 ```
 To use the api docs, open the following URL (use different host for zrok):
 `http://127.0.0.1/docs`
