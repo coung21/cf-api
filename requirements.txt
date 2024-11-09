@@ -17,4 +17,5 @@ sanic-cors
 python-dotenv
 gdown
 cloudinary
+sanic-openapi
 git+https://github.com/facebookresearch/segment-anything-2.git

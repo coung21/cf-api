@@ -8,6 +8,7 @@ from config import MONGO_URI, DB_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
 from routes import init_routes
 
 app = Sanic("CoffeeLeafAPI")
+print("Initializing routes")
 
 # Enable CORS (if needed)
 CORS(app)
@@ -53,4 +54,4 @@ async def ping(request):
 init_routes(app)
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8000)
+    app.run(host="localhost", port=8000, debug=False)
