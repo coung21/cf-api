@@ -47,5 +47,5 @@ async def predict_route(request):
     # Find the object with matching idx
     matching_obj = next(
         (item for item in pred if item['idx'] == result.tolist()[0]), None)
-    # Display the object if found
+ 
     return json({"result": matching_obj, "image_url": cloudinary_response["secure_url"]})
