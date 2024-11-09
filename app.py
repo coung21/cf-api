@@ -1,3 +1,4 @@
+
 from sanic import Sanic
 from sanic.response import json
 from sanic.log import logger
@@ -6,9 +7,11 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import cloudinary
 from config import MONGO_URI, DB_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME
 from routes import init_routes
+from sanic_ext import Extend
 
 app = Sanic("CoffeeLeafAPI")
-print("Initializing routes")
+Extend(app)
+
 
 # Enable CORS (if needed)
 CORS(app)
