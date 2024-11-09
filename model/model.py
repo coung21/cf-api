@@ -90,7 +90,9 @@ async def predict(image):
     model.eval()
     with torch.no_grad():
         output = model(input)
-        prd = output.argmax(dim=1)
-         
-    return prd
+        predictions = F.softmax(output, dim=1)
+        prd, idx = predictions.max(dim=1)
+        confidence = float(f"{prd.item():.3f}")
+        label = idx.item()
+    return label, confidence
 

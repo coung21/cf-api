@@ -26,6 +26,7 @@ async def get_histories_by_user_id(db, user_id):
                 "id": str(history["_id"]),
                 "image_url": history["image_url"],
                 "result": history["result"],
+                "confidence": history["confidence"],
                 "created_at": history.get("created_at").isoformat()
             })
         return histories
@@ -43,6 +44,7 @@ async def get_history_by_id(db, history_id):
             return {
                 "id": str(history["_id"]),
                 "image_url": history["image_url"],
+                "confidence": history["confidence"],
                 "result": next((item for item in data_dict if item['idx'] == history["result"]), None),
                 "created_at": history.get("created_at").isoformat()
             }

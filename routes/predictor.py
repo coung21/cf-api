@@ -7,10 +7,35 @@ from model.model import predict
 from cloudinary import uploader
 from services.history_service import add_history
 import json as jsn
+from sanic_ext import openapi
 predictor_routes = Blueprint("predictor", url_prefix="/predictor")
 
 
 @predictor_routes.route("/predict", methods=["POST"])
+@openapi.summary("Predict the disease of a leaf")
+@openapi.tag("Predictor")
+@openapi.body(
+    {
+        "multipart/form-data": {
+            "file": "file",
+            "user_id": str,
+        }
+    },
+    description="Predict the disease of a leaf with an image file and user_id"
+)
+@openapi.response(
+    200,
+    {"application/json": {
+        "result": {
+            "idx": int,
+            "disease": str,
+            "cause": str,
+            "solution": str
+        },
+        "confidence": float,
+        "image_url": str
+    }}
+)
 async def predict_route(request):
     file = request.files.get("file")
     user_id = request.form.get("user_id")
@@ -27,14 +52,15 @@ async def predict_route(request):
 
     image = sam_preprocess(image.cpu().numpy())
 
-    result = await predict(image)
+    result, confidence = await predict(image)
 
     cloudinary_response = uploader.upload(file.body)
 
     history_data = {
         "user_id": user_id,
         "image_url": cloudinary_response["secure_url"],
-        "result": result.tolist()[0],
+        "result": result,
+        "confidence": confidence
     }
 
     error = await add_history(request.app.ctx.db, history_data)
@@ -46,6 +72,6 @@ async def predict_route(request):
 
     # Find the object with matching idx
     matching_obj = next(
-        (item for item in pred if item['idx'] == result.tolist()[0]), None)
+        (item for item in pred if item['idx'] == result), None)
  
-    return json({"result": matching_obj, "image_url": cloudinary_response["secure_url"]})
+    return json({"result": matching_obj, "confidence": confidence ,"image_url": cloudinary_response["secure_url"]})
