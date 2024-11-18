@@ -20,7 +20,7 @@ history_routes = Blueprint("histories", url_prefix="/histories")
         "created_at": datetime
     }
 })
-@protected
+# @protected
 async def get_histories(request, user_id):
     histories = await get_histories_by_user_id(request.app.ctx.db, user_id)
     return json(histories)
@@ -45,7 +45,7 @@ async def get_histories(request, user_id):
         "created_at": datetime
     }
 })
-@protected
+# @protected
 async def get_history(request, history_id):
     history = await get_history_by_id(request.app.ctx.db, history_id)
     if history:

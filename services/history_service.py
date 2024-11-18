@@ -7,6 +7,7 @@ async def add_history(db, history_data):
         "user_id": history_data["user_id"],
         "image_url": history_data["image_url"],
         "result": history_data["result"],
+        "confidence": history_data["confidence"],
         "created_at": datetime.datetime.now()
     }
     

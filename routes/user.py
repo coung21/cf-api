@@ -22,7 +22,7 @@ user_routes = Blueprint("users", url_prefix="/users")
         }]
     }}
 )
-@protected
+# @protected
 async def get_users(request):
     users = await get_all_users(request.app.ctx.db)
     return json({"users": users})
@@ -41,7 +41,7 @@ async def get_users(request):
         "created_at": datetime
     }}
 )
-@protected
+# @protected
 async def get_user(request, user_id):
     user = await get_user_by_id(request.app.ctx.db, user_id)
     if user:
