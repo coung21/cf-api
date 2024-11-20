@@ -1,13 +1,13 @@
 [
     {
         "idx": 0,
-        "disease": "healthy",
+        "name": "healthy",
         "cause": "",
         "solution": []
     },
     {
         "idx": 2,
-        "disease": "rust",
+        "name": "rust",
         "cause": "Bệnh nấm này có tên là Hemileiavastatrix ảnh hưởng đến lá của cây cà phê. Cây cà phê đóng vai trò là vật chủ bắt buộc của CLR, vi khuẩn này phát triển và sinh sản trên bề mặt lá của cây cà phê. Nó làm suy giảm và tàn phá diện tích lá xanh làm thức ăn cho cây. Các triệu chứng của CLR bao gồm các đốm nhỏ, hơi vàng, nhờn trên bề mặt lá phía trên, sau đó mở rộng thành các đốm tròn lớn hơn, chuyển sang màu cam sáng, sau đó là màu đỏ và cuối cùng là màu nâu với viền màu vàng. Các vết rỉ sắt có dạng bột, màu vàng cam dưới mặt lá, sau chuyển sang màu đen. Những chiếc lá rỉ sét rụng xuống khiến những cây bị ảnh hưởng gần như trụi lá",
         "solution": [
             " Abenix 10FL (Albendazole 10%) sử dụng với nồng độ 0,25-0,3% (pha 25 - 30ml thuốc vào bình 10 lít phun ướt đều toàn cây, phun làm 2 lần cách nhau 7 ngày).",
