@@ -1,4 +1,5 @@
-from torchvision import transforms, models
+from torchvision import transforms
+from torchvision.models import MobileNet_V2_Weights, mobilenet_v2
 from torch import nn
 import torch
 from io import BytesIO
@@ -8,7 +9,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class Validator:
     def __init__(self, device):
-        self.model = models.mobilenet_v2(pretrained=True)
+        self.model = mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
         self.model.classifier[1] = nn.Sequential(
             nn.Linear(self.model.last_channel, 1),
             nn.Sigmoid()
