@@ -66,4 +66,4 @@ def sam_preprocess(img_batch):
     img_batch = np.stack(img_batch, axis=0) #(N,H,W,C)
     images = replace_background(img_batch, masks)
 
-    return torch.tensor(images, dtype=torch.float32)
+    return torch.tensor(images, dtype=torch.float32), torch.tensor(masks, dtype=torch.float32)
