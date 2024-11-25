@@ -28,9 +28,9 @@ class Validator:
             image = image.unsqueeze(0)
             
             with torch.no_grad():
-                output = self.model(image)
-                prob = output.item()
-                pred = 1 if prob > 0.5 else 0
+                output = self.model(image).squeeze()
+                probability = torch.sigmoid(output).item()
+                pred = 1 if probability > 0.5 else 0
                 print(pred)
                 return pred
     
