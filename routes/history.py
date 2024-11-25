@@ -1,6 +1,6 @@
 from sanic import Blueprint
 from sanic.response import json
-from services.history_service import get_histories_by_user_id, get_history_by_id
+from services.history_service import get_histories_by_user_id, get_history_by_id, get_histories_map
 from utils.jwt_utils import protected
 from sanic_ext import openapi
 from datetime import datetime
@@ -52,3 +52,23 @@ async def get_history(request, history_id):
         return json(history)
     else:
         return json({"error": "History not found"}, status=404)
+    
+    
+
+@history_routes.route("/map", methods=["GET"])
+@openapi.summary("Get histories map")
+@openapi.tag("History")
+@openapi.response(200, {
+    "application/json": {
+        "id": str,
+        "result": int,
+        "croods": {
+            "lat": float,
+            "long": float
+        },
+        "created_at": datetime
+    }
+})
+async def histories_map(request):
+    histories = await get_histories_map(request.app.ctx.db)
+    return json(histories)

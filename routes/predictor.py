@@ -22,6 +22,7 @@ predictor_routes = Blueprint("predictor", url_prefix="/predictor")
         "multipart/form-data": {
             "file": "file",
             "user_id": str,
+            "croods": str
         }
     },
     description="Predict the disease of a leaf with an image file and user_id"
@@ -42,6 +43,10 @@ predictor_routes = Blueprint("predictor", url_prefix="/predictor")
 async def predict_route(request):
     file = request.files.get("file")
     user_id = request.form.get("user_id")
+    croods = request.form.get("croods")
+
+    
+    
 
     if file is None:
         return json({"error": "No file is attached"}, status=400)
@@ -50,14 +55,24 @@ async def predict_route(request):
     if val_img is None:
         return json({"error": "Failed to process image"}, status=500)
     val_result = validator.predict(val_img)
+    print(val_result)
     if val_result == 0:
         return json({"error": "Invalid image"}, status=400)
+    
+    if croods is None:
+        return json({"error": "No croods is attached"}, status=400)
+    
+    # split lat,long
+    croods = croods.split(",")
+    lat = float(croods[0])
+    long = float(croods[1])
     
     
     image = read_file_as_image(file.body)
 
     if not isinstance(image, torch.Tensor):
         return json({"error": "Failed to process image to Tensor"}, status=500)
+
 
     img = image.unsqueeze(0)
 
@@ -83,7 +98,11 @@ async def predict_route(request):
         "user_id": user_id,
         "image_url": cloudinary_response["secure_url"],
         "result": result,
-        "confidence": confidence
+        "confidence": confidence,
+        "croods": {
+            "lat": lat,
+            "long": long
+        }
     }
 
     error = await add_history(request.app.ctx.db, history_data)
