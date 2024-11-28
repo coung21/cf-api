@@ -38,6 +38,9 @@ async def login_user(db, user_data):
     if not user or not bcrypt.verify(password, user['password_hash']):
         return {"error": "Invalid phone number or password", "status": 400}
 
-    # Generate JWT token
-    token = generate_jwt_token(user)
-    return {"message": "Login successful", "token": token}
+    log_user = {
+        "user_id": str(user["_id"]),
+        "phone": user["phone"],
+        "username": user["username"]
+    }
+    return {"message": "Login successful", "user": log_user}
