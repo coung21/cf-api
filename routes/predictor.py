@@ -1,90 +1,86 @@
-from sanic import Blueprint
-from sanic.response import json
-from utils.image_utils import read_file_as_image
-import torch
-from io import BytesIO
+from fastapi import APIRouter, UploadFile, Form, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.concurrency import run_in_threadpool
+from typing import Annotated
+from utils.image_utils import read_file_as_image, draw_mask
 from model.sam import sam_preprocess
 from model.model import predict
 from cloudinary import uploader
 from model.validator import validator
-import json as jsn
-from utils.image_utils import draw_mask
-from sanic_ext import openapi
+import torch
+from io import BytesIO
+import logging
+import json
+predictor_router = APIRouter()
+MAX_FILE_SIZE_MB = 5
 
-predictor_routes = Blueprint("predictor", url_prefix="/predictor")
 
+@predictor_router.post("/predict")
+async def predict_route(
+    file: UploadFile, user_id: Annotated[str, Form()], croods: Annotated[str, Form()]
+):
+    try:
+        content = await file.read()
 
-@predictor_routes.route("/predict", methods=["POST"])
-@openapi.summary("Predict the disease of a leaf")
-@openapi.tag("Predictor")
-@openapi.body(
-    {"multipart/form-data": {"file": "file", "user_id": str, "croods": str}},
-    description="Predict the disease of a leaf with an image file and user_id",
-)
-@openapi.response(
-    200,
-    {
-        "application/json": {
-            "result": {"idx": int, "disease": str, "cause": str, "solution": str},
-            "confidence": float,
-            "image_url": str,
-        }
-    },
-)
-async def predict_route(request):
-    file = request.files.get("file")
-    user_id = request.form.get("user_id")
-    croods = request.form.get("croods")
-    if file is None:
-        return json({"error": "No file is attached"}, status=400)
+        # Check file size
+        if len(content) > MAX_FILE_SIZE_MB * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="File size exceeds limit")
 
-    val_img = validator.read_file(file.body)
-    if val_img is None:
-        return json({"error": "Failed to process image"}, status=500)
-    val_result = validator.predict(val_img)
-    print(val_result)
-    if val_result == 0:
-        return json({"error": "Invalid image"}, status=400)
+        # Validate image
+        val_img = await run_in_threadpool(validator.read_file, content)
+        if val_img is None:
+            raise HTTPException(status_code=400, detail="Invalid image format")
 
-    if croods is None:
-        return json({"error": "No croods is attached"}, status=400)
+        val_result = await run_in_threadpool(validator.predict, val_img)
+        if val_result == 0:
+            raise HTTPException(status_code=400, detail="Image is not acceptable")
 
-    # split lat,long
-    croods = croods.split(",")
-    lat = float(croods[0])
-    long = float(croods[1])
+        # Validate and parse coordinates
+        try:
+            lat, long = map(float, croods.strip().split(","))
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid coordinates format")
 
-    image = read_file_as_image(file.body)
+        # Convert image to tensor
+        image_tensor = await run_in_threadpool(read_file_as_image, content)
+        if not isinstance(image_tensor, torch.Tensor):
+            raise HTTPException(status_code=500, detail="Image conversion failed")
 
-    if not isinstance(image, torch.Tensor):
-        return json({"error": "Failed to process image to Tensor"}, status=500)
+        img = image_tensor.unsqueeze(0)
 
-    img = image.unsqueeze(0)
+        # Preprocess and draw mask (inference)
+        with torch.no_grad():
+            image_np, mask = sam_preprocess(img.cpu().numpy())
+        seg_img = draw_mask(mask, img)
 
-    image, mask = sam_preprocess(img.cpu().numpy())
+        if seg_img is None:
+            raise HTTPException(status_code=500, detail="Failed to draw mask")
 
-    seg_img = draw_mask(mask, img)
+        # Upload to cloud
+        buffr = BytesIO()
+        seg_img.save(buffr, format="JPEG")
+        buffr.seek(0)
+        cloudinary_response = await run_in_threadpool(
+            uploader.upload, buffr, resource_type="image"
+        )
+        buffr.close()
 
-    if seg_img is None:
-        return json({"error": "Failed to draw mask"}, status=500)
+        # Model prediction
+        result, confidence = await predict(image_np)
+        print(f"Result: {result}, Confidence: {confidence}")
+        with open("data.json", "r", encoding="utf-8") as f:
+            pred = json.load(f)
+        matching_obj = next((item for item in pred if item["idx"] == result), None)
+        return JSONResponse(
+            {
+                "result": matching_obj,
+                "confidence": confidence,
+                "image_url": cloudinary_response.get("url"),
+            }
+        )
 
-    buffr = BytesIO()
-    seg_img.save(buffr, format="JPEG")
-    buffr.seek(0)
-
-    cloudinary_response = uploader.upload(buffr, resource_type="image")
-
-    buffr.close()
-
-    result, confidence = await predict(image)
-    print(f"type: {result}")
-    print(f"confidence: {confidence}")
-    print(f'{cloudinary_response.get("url")}')
-    # Trả về kết quả dự đoán
-    return json(
-        {
-            "result": result,
-            "confidence": confidence,
-            "image_url": cloudinary_response.get("url"),
-        }
-    )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logging.exception("Unexpected server error")
+        raise HTTPException(status_code=500, detail="Internal server error")

@@ -1,5 +1,5 @@
-from .predictor import predictor_routes
+from .predictor import predictor_router
 
 
 def init_routes(app):
-    app.blueprint(predictor_routes)
+    app.blueprint(predictor_router)
