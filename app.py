@@ -53,6 +53,7 @@ async def log_requests(request):
 async def ping(request):
     return json({"message": "pong"})
 
+
 # Initialize routes
 init_routes(app)
 
