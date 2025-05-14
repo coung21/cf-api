@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, Form, HTTPException
+from fastapi import APIRouter, UploadFile, Form, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.concurrency import run_in_threadpool
 from typing import Annotated
@@ -11,13 +11,17 @@ import torch
 from io import BytesIO
 import logging
 import json
+from services.history_service import add_history
 predictor_router = APIRouter()
 MAX_FILE_SIZE_MB = 5
 
 
 @predictor_router.post("/predict")
 async def predict_route(
-    file: UploadFile, user_id: Annotated[str, Form()], croods: Annotated[str, Form()]
+    request: Request,
+    file: UploadFile,
+    user_id: Annotated[str, Form()],
+    croods: Annotated[str, Form()],
 ):
     try:
         content = await file.read()
@@ -68,6 +72,18 @@ async def predict_route(
         # Model prediction
         result, confidence = await predict(image_np)
         print(f"Result: {result}, Confidence: {confidence}")
+        
+        
+        # Save history
+        history_data = {
+            "user_id": user_id,
+            "image_url": cloudinary_response.get("url"),
+            "result": result,
+            "confidence": confidence,
+            "croods": [lat, long],
+        }
+        error = await add_history(request.app.db, history_data)
+        
         with open("data.json", "r", encoding="utf-8") as f:
             pred = json.load(f)
         matching_obj = next((item for item in pred if item["idx"] == result), None)

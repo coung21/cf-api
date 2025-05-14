@@ -1,45 +1,36 @@
 import jwt
 import datetime
 from functools import wraps
-from sanic.response import json
+from fastapi import Request, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from config import SECRET_KEY
 
-
-def generate_jwt_token(user):
+# Tạo JWT
+def generate_jwt_token(user: dict) -> str:
     payload = {
-        "user_id": str(user['_id']),
-        "username": user['username'],
-        "phone": user['phone'],
-        "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+        "user_id": str(user["_id"]),
+        "username": user["username"],
+        "phone": user["phone"],
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
 
-
-def decode_jwt_token(token):
+# Giải mã JWT
+def decode_jwt_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return payload
     except jwt.ExpiredSignatureError:
-        return {"error": "Token expired"}
+        raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
-        return {"error": "Invalid token"}
+        raise HTTPException(status_code=401, detail="Invalid token")
 
-# JWT-protected decorator
+# Middleware bảo vệ route bằng JWT
+async def protected(request: Request) -> dict:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token missing")
 
-
-def protected(f):
-    @wraps(f)
-    async def decorated_function(request, *args, **kwargs):
-        auth_header = request.headers.get("Authorization")
-        if not auth_header:
-            return json({"error": "Token missing"}, status=401)
-
-        token = auth_header.split(" ")[1]
-        decoded = decode_jwt_token(token)
-        if "error" in decoded:
-            return json(decoded, status=401)
-
-        return await f(request, *args, **kwargs)
-
-    return decorated_function
+    token = auth_header.split(" ")[1]
+    return decode_jwt_token(token)

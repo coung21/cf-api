@@ -4,7 +4,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import cloudinary
 from config import MONGO_URI, DB_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME
 from routes.predictor import predictor_router
-
+from routes.auth import auth_router
+from routes.history import history_router
 app = FastAPI(title="CoffeeLeafAPI")
 
 # Enable CORS
@@ -36,3 +37,5 @@ async def ping():
 
 # Include routes
 app.include_router(predictor_router, prefix="/predictor")
+app.include_router(auth_router, prefix="/auth")
+app.include_router(history_router, prefix="/history")
