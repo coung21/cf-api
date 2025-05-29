@@ -4,11 +4,12 @@ from fastapi.concurrency import run_in_threadpool
 from typing import Annotated
 from utils.image_utils import read_file_as_image, draw_mask
 from model.sam import sam_preprocess
-from model.model import predict
+from model.model import model_predict
 from cloudinary import uploader
 from model.validator import validator
 import torch
 from io import BytesIO
+from PIL import Image
 import logging
 import json
 from services.history_service import add_history
@@ -35,9 +36,9 @@ async def predict_route(
         if val_img is None:
             raise HTTPException(status_code=400, detail="Invalid image format")
 
-        val_result = await run_in_threadpool(validator.predict, val_img)
-        if val_result == 0:
-            raise HTTPException(status_code=400, detail="Image is not acceptable")
+        # val_result = await run_in_threadpool(validator.predict, val_img)
+        # if val_result == 0:
+        #     raise HTTPException(status_code=400, detail="Image is not acceptable")
 
         # Validate and parse coordinates
         try:
@@ -68,9 +69,12 @@ async def predict_route(
             uploader.upload, buffr, resource_type="image"
         )
         buffr.close()
+        
+        image = Image.fromarray(image_np[0].astype("uint8")).convert("RGB")
+        # image.save("model/test/test.jpg")
 
         # Model prediction
-        result, confidence = await predict(image_np)
+        result, confidence = await model_predict(image)
         print(f"Result: {result}, Confidence: {confidence}")
         
         

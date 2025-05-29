@@ -1,98 +1,72 @@
+import os
+import pandas as pd
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+from tqdm import tqdm
 import torch
-from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
-from torchvision import transforms
+import torch.nn as nn
 import torch.nn.functional as F
-import sys
-from .unet import UNet
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, models
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
+import seaborn as sns
+from tqdm import tqdm
+from torch.utils.data import random_split
 
-
-transform_fn = transforms.Compose([
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
 ])
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = nn.Sequential(*list(models.resnet50().children())[:-2])
 
-class Model(torch.nn.Module):
-    def __init__(self, device):
-        super().__init__()
-        self.device = device
-        self.encoder1 = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT).features
-        self.encoder2 = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT).features
-        self.encoder3 = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT).features
-        self.unet = torch.load('model/checkpoints/unet-cf-2.pth', map_location=device, weights_only=False)
-        self.fc = torch.nn.Sequential(
-            torch.nn.Dropout(p=0.2),
-            torch.nn.Linear(3840, 2560),
-            torch.nn.ReLU(),
-            torch.nn.Linear(2560,1280),
-            torch.nn.ReLU(),
-            torch.nn.Linear(1280, 5),
-        )
-        for param in self.encoder1.parameters():
-            param.requires_grad = True
-        for param in self.encoder2.parameters():
-            param.requires_grad = True
-        for param in self.encoder3.parameters():
-            param.requires_grad = True
-        for param in self.unet.parameters():
-            param.requires_grad = True
+num_classes = 5
+model.avgpool = nn.AdaptiveAvgPool2d((1,1))
+model.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(2048, 512),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(512, num_classes)
+)
 
-
-    def forward(self, x): # x: (N, C, H, W)
-        symp_mask = self.unet(x / 255.0) #return (N, num_class, h, w)
-        symp_mask = symp_mask.argmax(dim=1) # return (N, h, w)
-        symp_mask = symp_mask.unsqueeze(1) # return (N, 1, h, w)
-        
-        symp = torch.where(symp_mask == 2, x, 255).to(torch.uint8) 
-        
-        color_image = torch.zeros((symp_mask.squeeze(1).size(0), 3, symp_mask.squeeze(1).size(1), symp_mask.squeeze(1).size(2)), dtype=torch.uint8)
-        color_image[:, 1, :, :] = (symp_mask.squeeze(1) == 1).byte() * 255  # Set green channel to 255 where class == 1
-        color_image[:, 0, :, :] = (symp_mask.squeeze(1) == 2).byte() * 255  # Set red channel to 255 where class == 2
-        
-        x = x / 255
-        symp = symp / 255
-        color_image = color_image / 255
-        
-        x = torch.stack([transform_fn(img) for img in x]).to(self.device)
-        symp = torch.stack([transform_fn(img) for img in symp]).to(self.device)
-        color_image = torch.stack([transform_fn(img) for img in color_image]).to(self.device)
-        
-        
-        x1 = self.encoder1(x) # return (N, 1280, 7,7)
-        x2 = self.encoder2(symp) # return (N, 1280, 7,7)
-        x3 = self.encoder3(color_image) # (N, 1280, 7,7)
-
-        x = torch.cat([x1, x2, x3], dim=1) # return (N, 3840, 7,7)
-
-        x = torch.nn.AdaptiveAvgPool2d(1)(x) # return (N, 3840, 1,1)
-        x = torch.flatten(x, start_dim=1) # return (N, 3840)
-        x = self.fc(x) # return (N, 5)
-
-        return x
+model = model.to("cuda" if torch.cuda.is_available() else "cpu")
+checkpoint_path = "model/checkpoints/cf_classifier.pt"
+if os.path.exists(checkpoint_path):
+    print(f"Loading model from {checkpoint_path}")
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(checkpoint_path))
+    else:
+        model.load_state_dict(torch.load(checkpoint_path, map_location='cpu'))
+else:
+    print(f"Checkpoint not found at {checkpoint_path}. Please check the path.")
     
     
+# def _resize_batch(batch):
+#     img_size = (224, 224)
+#     batch = batch.permute(0,3,1,2)
+#     batch = F.interpolate(batch, size=img_size, mode='bilinear', align_corners=False)
+#     batch = batch.clone().detach().to(torch.float32)  # Ensure the tensor is float32
+#     return batch # (N, C, H, W)
 
-sys.modules['__main__'].Model = Model
-sys.modules['__main__'].UNet = UNet
-model = torch.load("model/checkpoints/cf_model.pt", map_location=device, weights_only=False)
 
-
-def _resize_batch(batch):
-    img_size = (224, 224)
-    batch = batch.permute(0,3,1,2)
-    batch = F.interpolate(batch, size=img_size, mode='bilinear', align_corners=False)
-    batch = batch.clone().detach().to(torch.uint8)
-    return batch # (N, C, H, W)
-
-async def predict(image):
-    input = _resize_batch(image)
-    input = input.to(device)
-    model.eval()
+    
+async def model_predict(image):
+    """Predict the class of an image
+    Args:
+        image_tensor (torch.Tensor): Input image tensor of shape (N, H, W, C)
+        tuple: Predicted class index and confidence score
+    """
+    image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
+    image_tensor = image_tensor.to("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(image_tensor.device)
     with torch.no_grad():
-        output = model(input)
+        model.eval()
+        output = model(image_tensor)
         predictions = F.softmax(output, dim=1)
         prd, idx = predictions.max(dim=1)
         confidence = float(f"{prd.item():.3f}")
         label = idx.item()
     return label, confidence
-
