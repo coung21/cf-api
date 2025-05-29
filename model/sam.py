@@ -3,7 +3,9 @@ import torch
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 import numpy as np
-
+from model.bbox_regressor import model as bbox_regressor
+from torchvision.transforms import functional as F
+import matplotlib.pyplot as plt
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 sam2_checkpoint = "model/checkpoints/sam2.1_hiera_small.pt"
@@ -38,32 +40,46 @@ def replace_background(img_batch, masks_batch):
 
     return result
 
-def sam_preprocess(img_batch):
+def sam_preprocess(images_np):
     
-    img_batch = [img for img in img_batch]
+    # print(images_np.shape)
+    regressor_input = F.to_tensor(images_np.squeeze(0))
+    # regressor_input = images_np.permute(0, 3, 1, 2)  # (N, C, H, W)
+    # print(regressor_input.shape)
+    regressor_input = regressor_input.to(device)
+    
+    with torch.no_grad():
+        regressor_output = bbox_regressor(regressor_input.unsqueeze(0))  # Add batch dimension
+    
+    for box in regressor_output[0]['boxes']:
+        x_min, y_min, x_max, y_max = box.int().cpu().numpy()
+    
+    
+        
+    
+    img_batch = [img for img in images_np]
 
-    c_point = np.array([[[2048 // 2, 1024 // 2]]])
+    bbox = np.array([[x_min, y_min, x_max, y_max]])
+    bboxs = [bbox] * len(img_batch)
     
-    pts = [c_point] * len(img_batch)
     
-    input_label = np.array([[1]])
-    
-    input_label = [input_label] * len(img_batch)
 
-    boxes = np.array([[70, 70, 2048 - 70 , 1024 - 70]])
-    
-    boxes = [boxes] * len(img_batch)
     
     predictor.set_image_batch(img_batch)
 
     masks, _, _ = predictor.predict_batch( 
-      point_coords_batch=pts,
-      point_labels_batch=input_label,
-      box_batch=boxes,
+      point_coords_batch=None,
+      point_labels_batch=None,
+      box_batch=bboxs,
       multimask_output=False,
       )
     masks = np.stack(masks, axis=0) #(N,1,H,W)
     img_batch = np.stack(img_batch, axis=0) #(N,H,W,C)
     images = replace_background(img_batch, masks)
+    
+  
+     # save replaced background image
+    # plt.imsave('model/test/test.jpg', images[0].astype(np.uint8))    
+    
 
-    return torch.tensor(images, dtype=torch.float32), torch.tensor(masks, dtype=torch.float32)
+    return images, torch.tensor(masks, dtype=torch.float32)

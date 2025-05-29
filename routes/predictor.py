@@ -4,13 +4,14 @@ from utils.image_utils import read_file_as_image
 import torch
 from io import BytesIO
 from model.sam import sam_preprocess
-from model.model import predict
+from model.model import model_predict
 from cloudinary import uploader
 from services.history_service import add_history
 from model.validator import validator
 import json as jsn
 from utils.image_utils import draw_mask
 from sanic_ext import openapi
+from PIL import Image
 predictor_routes = Blueprint("predictor", url_prefix="/predictor")
 
 
@@ -91,7 +92,9 @@ async def predict_route(request):
     
     buffr.close()
 
-    result, confidence = await predict(image)
+    image = Image.fromarray(image[0].astype("uint8")).convert("RGB")
+    
+    result, confidence = await model_predict(image)
 
 
     history_data = {
